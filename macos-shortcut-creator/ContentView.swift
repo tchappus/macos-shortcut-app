@@ -71,6 +71,9 @@ struct ContentView: View {
 
                         do {
                             try linkXml.write(to: savePanel.url!, atomically: true, encoding: String.Encoding.utf8)
+                            
+                            _ = NSWorkspace.shared.setIcon(state.image, forFile: savePanel.url!.path)
+                            
                         } catch {
                             print("error saving shortcut")
                         }
