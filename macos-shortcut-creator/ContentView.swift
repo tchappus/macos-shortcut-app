@@ -27,6 +27,11 @@ struct LinkView: View {
     
 }
 
+func getDesktopDir() -> URL {
+    let paths = FileManager.default.urls(for: .desktopDirectory, in: .userDomainMask)
+    return paths[0]
+}
+
 enum LoadIconError: Error {
     case errorOccurred(internalErr: Error)
     case noImage
@@ -41,6 +46,40 @@ struct ContentView: View {
             if err == nil && data != nil {
                 DispatchQueue.main.async {
                     state.image = NSImage(data: data!)
+                    
+                    let savePanel = NSSavePanel()
+                    savePanel.title = "Save Shortcut..."
+                    savePanel.prompt = "Save to file"
+                    savePanel.nameFieldLabel = "Pick a name"
+                    savePanel.nameFieldStringValue = state.metadata!.title!
+                    savePanel.allowedFileTypes = ["webloc"]
+                    
+                    let result = savePanel.runModal()
+                    
+                    switch result {
+                    case .OK:
+                        let linkXml = """
+                        <?xml version="1.0" encoding="UTF-8"?>
+                        <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+                        <plist version="1.0">
+                            <dict>
+                                <key>URL</key>
+                                <string>\(state.link)</string>
+                            </dict>
+                        </plist>
+                        """
+
+                        do {
+                            try linkXml.write(to: savePanel.url!, atomically: true, encoding: String.Encoding.utf8)
+                        } catch {
+                            print("error saving shortcut")
+                        }
+                        print("OK")
+                    case .cancel:
+                        print("User Cancelled")
+                    default:
+                        print("Panel shouldn't be anything other than OK or Cancel")
+                    }
                 }
             } else if err != nil {
                 error = LoadIconError.errorOccurred(internalErr: err!)
