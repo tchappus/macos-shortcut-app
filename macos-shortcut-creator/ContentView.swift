@@ -73,6 +73,8 @@ struct ContentView: View {
                             try linkXml.write(to: savePanel.url!, atomically: true, encoding: String.Encoding.utf8)
                             
                             _ = NSWorkspace.shared.setIcon(state.image, forFile: savePanel.url!.path)
+                                                    
+                            try FileManager.default.setAttributes([FileAttributeKey.extensionHidden: NSNumber(value: true)], ofItemAtPath: savePanel.url!.path)
                             
                         } catch {
                             print("error saving shortcut")
@@ -130,7 +132,7 @@ struct ContentView: View {
             LinkView(metadata: $state.metadata, image: $state.image)
         }
         .padding()
-        .navigationTitle("ShortDash")
+        .navigationTitle("Shortcut Creator")
         .frame(minWidth: 600, minHeight: 300)
     }
 }
